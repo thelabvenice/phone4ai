@@ -71,7 +71,12 @@ Everything it can do in a normal session:
 
 ## How it works
 
-The plugin connects to Phone4.ai via WebSocket — no tunnel, no ngrok, no port forwarding. Your API key authenticates the connection. When someone calls your number, the event flows through the WebSocket to Claude in real time.
+```
+Your phone ──call──> Phone4.ai ──WebSocket──> Claude Code
+                                  <──reply──
+```
+
+No tunnel. No ngrok. No port forwarding. The plugin opens an outbound WebSocket to Phone4.ai — your machine never needs to be publicly reachable. When someone calls your number, the voice is transcribed and pushed to Claude in real time. Claude's response is spoken back to the caller.
 
 ## Pricing
 
