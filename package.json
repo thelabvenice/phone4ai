@@ -1,7 +1,7 @@
 {
   "name": "phone4ai",
-  "version": "1.0.0",
-  "description": "A phone number for your Claude — receive and make real phone calls with ElevenLabs TTS",
+  "version": "2.0.0",
+  "description": "A phone number for your Claude — receive and make real phone calls",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {
@@ -11,25 +11,13 @@
     "start": "bun server.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "@ngrok/ngrok": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0"
   },
-  "keywords": [
-    "phone",
-    "voice",
-    "claude",
-    "mcp",
-    "phone4ai",
-    "elevenlabs",
-    "tts"
-  ],
+  "keywords": ["phone", "voice", "claude", "mcp", "phone4ai"],
   "repository": {
     "type": "git",
     "url": "https://github.com/thelabvenice/phone4ai"
   },
   "homepage": "https://www.phone4.ai",
-  "author": "Westbridge Solutions LLC",
-  "engines": {
-    "node": ">=18"
-  }
+  "author": "Westbridge Solutions LLC"
 }
