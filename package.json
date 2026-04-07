@@ -1,6 +1,6 @@
 {
   "name": "phone4ai",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A phone number for your Claude — receive and make real phone calls",
   "license": "Apache-2.0",
   "type": "module",
@@ -13,7 +13,13 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
   },
-  "keywords": ["phone", "voice", "claude", "mcp", "phone4ai"],
+  "keywords": [
+    "phone",
+    "voice",
+    "claude",
+    "mcp",
+    "phone4ai"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/thelabvenice/phone4ai"
