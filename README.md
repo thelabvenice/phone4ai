@@ -76,7 +76,7 @@ The plugin connects to Phone4.ai via WebSocket — no tunnel, no ngrok, no port 
 ## Pricing
 
 - **Phone number:** $5/month ([phone4.ai](https://www.phone4.ai))
-- **Claude Code:** Requires Max or Max Pro subscription
+- **Claude Code:** Any plan that supports MCP servers
 
 ## License
 
