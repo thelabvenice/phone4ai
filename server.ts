@@ -383,7 +383,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
 
         const resp = await fetch(`${PHONE4AI_API}/v1/call`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${PHONE4AI_KEY}` },
           body: JSON.stringify(body),
         })
         const result = await resp.json() as Record<string, unknown>
