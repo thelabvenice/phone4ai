@@ -8,54 +8,32 @@ A phone number for your Claude. Receive and make real phone calls from your Clau
 
 Sign up at [phone4.ai](https://www.phone4.ai) and pay $5/month. You'll get a real US phone number.
 
-### 2. Set up ngrok
+### 2. Copy your config
 
-You need a tunnel so calls can reach your local machine. Get an [ngrok account](https://dashboard.ngrok.com/signup) with a [fixed domain](https://dashboard.ngrok.com/domains) ($8/month).
+From your [account page](https://api.phone4.ai/account), copy the `.mcp.json` block. It has your API key and number pre-filled.
 
-### 3. Configure
+### 3. Add to your project
 
-Create `~/.claude/channels/phone4ai/.env`:
-
-```bash
-mkdir -p ~/.claude/channels/phone4ai
-cp .env.example ~/.claude/channels/phone4ai/.env
-# Edit with your credentials
-```
-
-### 4. Connect your number
-
-From your [account page](https://api.phone4.ai/account), copy your connect code. Then:
-
-```bash
-curl -X POST https://api.phone4.ai/v1/connect \
-  -H "Content-Type: application/json" \
-  -d '{"code": "YOUR-CONNECT-CODE", "agentWebhook": "https://YOUR-NGROK-DOMAIN"}'
-```
-
-### 5. Add to Claude Code
-
-Add to your project's `.mcp.json`:
+Paste into your project's `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "phone4ai": {
       "command": "npx",
-      "args": ["phone4ai"]
+      "args": ["phone4ai"],
+      "env": {
+        "PHONE4AI_KEY": "p4ai_your_key_here",
+        "PHONE4AI_NUMBER": "+1your_number"
+      }
     }
   }
 }
 ```
 
-Or run with the plugin flag:
+### 4. Start listening
 
-```bash
-claude --plugin-dir /path/to/phone4ai
-```
-
-### 6. Start listening
-
-In your Claude Code session:
+Restart Claude Code, then:
 
 ```
 Listen for incoming phone calls
@@ -73,14 +51,12 @@ Everything it can do in a normal session:
 - **Send messages** — "Text this summary to my Telegram"
 - **Code search** — "What does the auth middleware do?"
 
-The caller hears Claude's responses spoken aloud via ElevenLabs TTS.
-
 ## MCP Tools
 
 | Tool | Description |
 |------|-------------|
 | `phone_listen` | Wait for the next call event (blocks up to 30s) |
-| `phone_respond` | Reply to the caller (text → speech) |
+| `phone_respond` | Reply to the caller (text is spoken aloud) |
 | `phone_call` | Make an outbound call |
 | `phone_hangup` | End an active call |
 | `phone_status` | Check account status |
@@ -89,19 +65,17 @@ The caller hears Claude's responses spoken aloud via ElevenLabs TTS.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
+| `PHONE4AI_KEY` | Yes | API key from your [account page](https://api.phone4.ai/account) |
 | `PHONE4AI_NUMBER` | Yes | Your Phone4.ai number (E.164) |
-| `NGROK_AUTHTOKEN` | Yes | ngrok auth token |
-| `NGROK_DOMAIN` | Yes | ngrok fixed domain |
-| `ELEVENLABS_API_KEY` | No | ElevenLabs API key (for high-quality TTS) |
-| `ELEVENLABS_VOICE_ID` | No | ElevenLabs voice ID |
 | `PHONE4AI_API` | No | API endpoint (default: https://api.phone4.ai) |
-| `PHONE_WEBHOOK_PORT` | No | Webhook port (default: 7600) |
+
+## How it works
+
+The plugin connects to Phone4.ai via WebSocket — no tunnel, no ngrok, no port forwarding. Your API key authenticates the connection. When someone calls your number, the event flows through the WebSocket to Claude in real time.
 
 ## Pricing
 
 - **Phone number:** $5/month ([phone4.ai](https://www.phone4.ai))
-- **ngrok tunnel:** $8/month for fixed domain ([ngrok.com](https://ngrok.com))
-- **ElevenLabs TTS:** Optional, free tier available ([elevenlabs.io](https://elevenlabs.io))
 - **Claude Code:** Requires Max or Max Pro subscription
 
 ## License
