@@ -1,0 +1,12 @@
+{
+  "name": "phone4ai",
+  "description": "A phone number for Claude — receive and make real phone calls with ElevenLabs TTS.",
+  "version": "1.0.0",
+  "keywords": [
+    "phone",
+    "voice",
+    "channel",
+    "mcp",
+    "phone4ai"
+  ]
+}
