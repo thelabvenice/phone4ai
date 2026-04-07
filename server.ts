@@ -126,6 +126,30 @@ function connectWebSocket() {
       const from = String(msg.from || '')
       const speech = String(msg.speech || '')
 
+      // Check for queued late response — send it immediately as reply to this event
+      const queued = queuedResponses.get(callId)
+      if (queued && eventType !== 'call_end') {
+        log(`Sending queued response for call ${callId}: "${queued.text}"`)
+        ws!.send(JSON.stringify({
+          reply_to: String(msg.id),
+          action: queued.hangup ? 'say' : 'gather',
+          text: queued.text,
+          timeoutSec: queued.hangup ? undefined : 5,
+          bargeIn: queued.hangup ? undefined : true,
+        }))
+        queuedResponses.delete(callId)
+        // Don't store message ID — we consumed it for the queued response
+      } else if (eventType !== 'call_end') {
+        // Store message ID for phone_respond
+        lastMessageIds.set(callId, String(msg.id))
+      }
+
+      // Clean up on call end
+      if (eventType === 'call_end') {
+        lastMessageIds.delete(callId)
+        queuedResponses.delete(callId)
+      }
+
       const content = eventType === 'call_start'
         ? `[Incoming phone call from ${from}]`
         : eventType === 'call_end'
@@ -143,11 +167,6 @@ function connectWebSocket() {
         content,
         ts: String(msg.ts || new Date().toISOString()),
       })
-
-      // Store the message ID so phone_respond can reply
-      if (eventType !== 'call_end') {
-        lastMessageIds.set(callId, String(msg.id))
-      }
     }
   }
 
@@ -168,6 +187,10 @@ function connectWebSocket() {
 // Track last message ID per call for reply_to
 const lastMessageIds = new Map<string, string>()
 
+// Late response queue — when Claude responds but the server already timed out,
+// queue the response and deliver it on the next event for this call.
+const queuedResponses = new Map<string, { action: string; text: string; hangup: boolean }>()
+
 function sendWsResponse(callId: string, action: string, text: string, hangup?: boolean) {
   if (!ws || !wsReady) {
     log('WebSocket not connected — cannot respond')
@@ -176,8 +199,10 @@ function sendWsResponse(callId: string, action: string, text: string, hangup?: b
 
   const replyTo = lastMessageIds.get(callId)
   if (!replyTo) {
-    log(`No message ID for call ${callId} — cannot reply`)
-    return false
+    // No message ID — queue for next event on this call
+    log(`Queuing late response for call ${callId}`)
+    queuedResponses.set(callId, { action, text, hangup: !!hangup })
+    return true
   }
 
   ws.send(JSON.stringify({
@@ -195,7 +220,7 @@ function sendWsResponse(callId: string, action: string, text: string, hangup?: b
 // ── MCP Server ───────────────────────────────────────────────────────────────
 
 const mcp = new Server(
-  { name: 'phone4ai', version: '2.0.0' },
+  { name: 'phone4ai', version: '2.0.1' },
   {
     capabilities: { tools: {} },
     instructions: [
@@ -332,7 +357,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
         const sent = sendWsResponse(callId, hangup ? 'say' : 'gather', text, !!hangup)
         if (!sent) {
           return {
-            content: [{ type: 'text', text: 'Warning: Could not send response — WebSocket not connected or no pending message for this call.' }],
+            content: [{ type: 'text', text: 'Warning: Could not send response — WebSocket not connected.' }],
             isError: true,
           }
         }
